@@ -43,19 +43,18 @@ def genere_coin():
     mat_coin = [l1, l2, l3, l3, l3, l2, l1]
 
 def verif_coin(mat):
+    cpt = 1
     coin = [[0]*7 for i in range (7)]
-    cpt = 0
-    for (m, n) in [(nbrCol(mat) - 7, nbrLig(mat) - 7), (nbrCol(mat) - 7, 0), (0, 0), (0, nbrLig(mat) - 7)]:
+    for (m, n) in [(0, nbrCol(mat) - 7), (0, 0), (nbrLig(mat) - 7, 0)]:
         for i in range (7):
             for j in range(7):
                 coin[i][j] = mat[i + m][j + n]
-        if cpt == 0 and coin == mat_coin:
-            mat = rotate(mat)
-        elif cpt > 0 and coin != mat_coin:
-            for h in range (cpt):
+        if coin != mat_coin:
+            for k in range (cpt):
                 mat = rotate(mat)
+            return(mat)
         cpt += 1
-    return mat
+    return(mat)
 
 """
 racine=tk.Tk()
