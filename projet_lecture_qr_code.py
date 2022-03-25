@@ -57,6 +57,9 @@ def verif_coin(mat):
         cpt += 1
     return mat
 
+
+#szubyfhiaezyufhaziufeza
+
 """
 racine=tk.Tk()
 
