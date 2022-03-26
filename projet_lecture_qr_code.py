@@ -56,6 +56,35 @@ def verif_coin(mat):
         cpt += 1
     return(mat)
 
+def correction(bits):
+    c1 = (bits[3] + bits[4] + bits[6]) % 2
+    c2 = (bits[3] + bits[5] + bits[6]) % 2
+    c3 = (bits[4] + bits[5] + bits[6]) % 2
+    if c1 != bits[0] and c2 != bits[1] and c3 == bits[2]:
+        if bits[3] == 0:
+            bits_corr = [1] + bits[4:]
+        else :
+            bits_corr = [0] + bits[4:]
+    elif c1 != bits[0] and c2 == bits[1] and c3 != bits[2]:
+        if bits[4] == 0:
+            bits_corr = bits[3] + [1] + bits[5:]
+        else :
+            bits_corr = bits[3] + [0] + bits[5:]
+    elif c1 == bits[0] and c2 != bits[1] and c3 != bits[2]:
+        if bits[5] == 0:
+            bits_corr = bits[3:5] + [1] + bits[6]
+        else :
+            bits_corr = bits[3:5] + [0] + bits[6]
+    elif c1 != bits[0] and c2 != bits[1] and c3 != bits[2]:
+        if bits[6] == 0:
+            bits_corr = bits[3:6] + [1]
+        else :
+            bits_corr = bits[3:6] + [0]
+    return bits_corr
+
+print(correction([1, 1, 1, 1, 1, 0, 1]))
+
+
 """
 racine=tk.Tk()
 
