@@ -5,11 +5,11 @@ from PIL import ImageTk
 import tkinter as tk
 
 #Fonctions
-def nbrCol(matrice):
-    return(len(matrice[0]))
+def nbrCol(mat):
+    return(len(mat[0]))
 
-def nbrLig(matrice):
-    return len(matrice)
+def nbrLig(mat):
+    return len(mat)
 
 def saving(mat, filename):#sauvegarde l'image contenue dans matpix dans le fichier filename
 							 #utiliser une extension png pour que la fonction fonctionne sans perte d'information
@@ -36,25 +36,25 @@ def rotate(mat):
     return mat_rota
 
 def genere_coin():
-    global mat_coin
+    global coin_QR
     l1 = [0] * 7
     l2 = [0] + [1] * 5 + [0]
     l3 = [0,1] + [0] * 3 + [1,0]
-    mat_coin = [l1, l2, l3, l3, l3, l2, l1]
+    coin_QR = [l1, l2, l3, l3, l3, l2, l1]
 
-def verif_coin(mat):
+def verif_coin(QR):
     cpt = 1
     coin = [[0]*7 for i in range (7)]
-    for (m, n) in [(0, nbrCol(mat) - 7), (0, 0), (nbrLig(mat) - 7, 0)]:
+    for (m, n) in [(0, nbrCol(QR) - 7), (0, 0), (nbrLig(QR) - 7, 0)]:
         for i in range (7):
             for j in range(7):
-                coin[i][j] = mat[i + m][j + n]
-        if coin != mat_coin:
+                coin[i][j] = QR[i + m][j + n]
+        if coin != coin_QR:
             for k in range (cpt):
-                mat = rotate(mat)
-            return(mat)
+                QR = rotate(QR)
+            return(QR)
         cpt += 1
-    return(mat)
+    return(QR)
 
 def correction(bits):
     C = [(bits[3] + bits[4] + bits[6]) % 2, (bits[3] + bits[5] + bits[6]) % 2, (bits[4] + bits[5] + bits[6]) % 2]
@@ -74,6 +74,21 @@ def correction(bits):
             bits[6] = 0
             return bits[3:]
     return bits[3:]
+
+def lecture (QR):
+    bloc = []
+    QR_lu = []
+    for i in range (nbrLig(QR), 8, -2):
+        for j in range (nbrCol(QR), 10, -1):
+            if len(bloc) < 13 :
+                bloc.append(QR[i][j])
+                bloc.append(QR[i-1][j])
+            else :
+                QR_lu.append(bloc)
+                bloc = []
+                bloc.append(QR[i][j])
+                bloc.append(QR[i-1][j])
+    return(QR_lu)
 
 """
 racine=tk.Tk()
