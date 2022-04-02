@@ -71,6 +71,29 @@ def code_Hamming74 (bits):
     v3 = (bits[1] + bits[2] + bits[3])%2
     return([v1, v2, bits[0], v3, bits[1], bits[2], bits[3]])
 
+def lecture (QR):
+    bloc = []
+    L_QR = []
+    cpt = 0
+    for i in range (nbrLig(QR) - 1, 8, -2):
+        if cpt % 2 == 0:
+            m = nbrCol(QR) - 1
+            n = nbrCol(QR) - 15
+            p = -1
+        else :
+            m = nbrCol(QR) - 14
+            n = nbrCol(QR)
+            p = 1
+        for j in range (m, n, p):
+            if len(bloc) == 14 :
+                L_QR.append(bloc)
+                bloc = []
+            bloc.extend([QR[i][j], QR[i-1][j]])
+        L_QR.append(bloc)
+        bloc = []
+        cpt += 1
+    return(L_QR)
+
 """
 racine=tk.Tk()
 
@@ -81,4 +104,12 @@ b_save.pack(side="top", fill="x")
 b_charge.pack(side="top", fill="x")
 
 racine.mainloop()
+"""
+"""
+[0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0]
+[0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0]
+"""
+"""
+[1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], [1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1]
+[1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], [1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1]
 """
