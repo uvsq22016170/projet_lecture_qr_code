@@ -56,39 +56,20 @@ def verif_coin(QR):
         cpt += 1
     return(QR)
 
-def correction(bits):
-    C = [(bits[3] + bits[4] + bits[6]) % 2, (bits[3] + bits[5] + bits[6]) % 2, (bits[4] + bits[5] + bits[6]) % 2]
-    for b in [(0, 1, 2, 3), (0, 2, 1, 4), (1, 2, 0, 5)] :
-        if C[b[0]] != bits[b[0]] and C[b[1]] != bits[b[1]] and C[b[2]] == bits[b[2]]:
-            if bits[b[3]] == 0:
-                bits[b[3]] = 1
-                return bits[3:]
-            else :
-                bits[b[3]] = 0
-                return bits[3:]
-    if C[0] != bits[0] and C[1] != bits[1] and C[2] != bits[2]:
-        if bits[6] == 0:
-            bits[6] = 1
-            return bits[3:]
-        else :
-            bits[6] = 0
-            return bits[3:]
-    return bits[3:]
+def decode_Hamming74 (bits):
+    c1 = int(bits[0] != (bits[2] + bits[4] + bits[6])%2)
+    c2 = int(bits[1] != (bits[2] + bits[5] + bits[6])%2)
+    c3 = int(bits[3] != (bits[4] + bits[5] + bits[6])%2)
+    if c1 + c2 + c3 > 0:
+        pos = c3 * 4 + c2 * 2 + c1 - 1
+        bits[pos] = (bits[pos] + 1) % 2
+    return [bits[2], bits[4], bits[5], bits[6]]
 
-def lecture (QR):
-    bloc = []
-    QR_lu = []
-    for i in range (nbrLig(QR), 8, -2):
-        for j in range (nbrCol(QR), 10, -1):
-            if len(bloc) < 13 :
-                bloc.append(QR[i][j])
-                bloc.append(QR[i-1][j])
-            else :
-                QR_lu.append(bloc)
-                bloc = []
-                bloc.append(QR[i][j])
-                bloc.append(QR[i-1][j])
-    return(QR_lu)
+def code_Hamming74 (bits):
+    v1 = (bits[0] + bits[1] + bits[3])%2
+    v2 = (bits[0] + bits[2] + bits[3])%2
+    v3 = (bits[1] + bits[2] + bits[3])%2
+    return([v1, v2, bits[0], v3, bits[1], bits[2], bits[3]])
 
 """
 racine=tk.Tk()
