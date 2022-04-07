@@ -56,6 +56,12 @@ def verif_coin(QR):
         cpt += 1
     return(QR)
 
+def verif_ligne(mat):
+    l1 = [i % 2 for i in range (13)] 
+    l2 = [0] * 12
+    for i in range(6, 19):
+        pass
+
 def decode_Hamming74 (bits):
     c1 = int(bits[0] != (bits[2] + bits[4] + bits[6])%2)
     c2 = int(bits[1] != (bits[2] + bits[5] + bits[6])%2)
