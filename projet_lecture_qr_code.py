@@ -43,6 +43,7 @@ def genere_coin():
     coin_QR = [l1, l2, l3, l3, l3, l2, l1]
 
 def verif_coin(QR):
+    genere_coin()
     cpt = 1
     coin = [[0]*7 for i in range (7)]
     for (m, n) in [(0, nbrCol(QR) - 7), (0, 0), (nbrLig(QR) - 7, 0)]:
@@ -56,10 +57,18 @@ def verif_coin(QR):
         cpt += 1
     return(QR)
 
-def verif_ligne(mat):
+def verif_ligne_colonne(QR):
     l1 = [i % 2 for i in range (13)] 
-    l2 = [0] * 12
+    l2 = [0] * 13
     for i in range(6, 19):
+        l2[i-6]=QR[6][i]
+    if l2 != l1:
+        print("Erreur: Le QR code n'a pas le bon format")
+        pass
+    for j in range(6, 19):
+        l2[j-6]=QR[j][6]
+    if l2 != l1:
+        print("Erreur: Le QR code n'a pas le bon format")
         pass
 
 def decode_Hamming74 (bits):
@@ -110,12 +119,4 @@ b_save.pack(side="top", fill="x")
 b_charge.pack(side="top", fill="x")
 
 racine.mainloop()
-"""
-"""
-[0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0]
-[0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0]
-"""
-"""
-[1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], [1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1]
-[1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], [1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1]
 """
