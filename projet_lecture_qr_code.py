@@ -102,9 +102,13 @@ def lecture (QR):
             p = 1
         for j in range (m, n, p):
             if len(bloc) == 14 :
+                if bloc == [1]*14:
+                    return(L_QR, type_donnees)
                 L_QR.append(bloc)
                 bloc = []
             bloc.extend([QR[i][j], QR[i-1][j]])
+        if bloc == [1]*14:
+            return(L_QR, type_donnees)
         L_QR.append(bloc)
         bloc = []
         cpt += 1
@@ -123,15 +127,14 @@ def decodage (LQR_et_type):
             txt += hex(int("".join(map(str, decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:]))), 2))[2:4]
         return txt
 
-QR = lecture(loading("qr_code_ssfiltre_ascii.png"))[0]
+"""QR = lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png")))[0]
 txt = []
 for i in range (nbrLig(QR)):
-    txt += [decode_Hamming74 (QR[i][:7]) + decode_Hamming74 (QR[i][7:])]
-print(txt)
-
-#print(lecture(loading("qr_code_ssfiltre_ascii.png")))
-#print(decodage(lecture(loading("qr_code_ssfiltre_ascii.png"))))
-
+    l = decode_Hamming74 (QR[i][:7]) + decode_Hamming74 (QR[i][7:])
+    txt += [l]
+print(txt)"""
+#print(lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png"))))
+#print(decodage(lecture(verif_coin(loading("qr_code_ssfiltre_num.png")))))
 
 """
 racine=tk.Tk()
