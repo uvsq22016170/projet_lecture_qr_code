@@ -128,7 +128,9 @@ def decodage (LQR_et_type):
         return txt
 
 def enlever_filtre(QR):
-    if (QR[23][8], QR[22][8]) == (0,1):
+    if (QR[23][8], QR[22][8]) == (0,0):
+        return QR
+    elif (QR[23][8], QR[22][8]) == (0,1):
         filtre = [[(j+i)%2 for i in range (25)]for j in range (25)]
     elif (QR[23][8], QR[22][8]) == (1,0):
         filtre = [[j%2 for i in range (25)]for j in range (25)]
