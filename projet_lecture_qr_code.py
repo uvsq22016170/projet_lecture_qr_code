@@ -1,8 +1,10 @@
 #Importation des modules
+import tkinter as tk
 import PIL as pil
 from PIL import Image
 from PIL import ImageTk 
-import tkinter as tk
+from tkinter import filedialog
+from tkinter import simpledialog
 
 #Fonctions
 def nbrCol(mat):
@@ -75,14 +77,14 @@ def decode_Hamming74 (bits):
     c1 = bits[4] != (bits[0] + bits[1] + bits[3])%2
     c2 = bits[5] != (bits[0] + bits[2] + bits[3])%2
     c3 = bits[6] != (bits[1] + bits[2] + bits[3])%2
-    if c1 and c2:
-        bits[0] = (bits[0] + 1) % 2
-    elif c2 and c3:
-        bits[1] = (bits[1] + 1) % 2
-    elif c1 and c3:
-        bits[2] = (bits[2] + 1) % 2
-    elif c1 and c2 and c3:
+    if c1 and c2 and c3:
         bits[3] = (bits[3] + 1) % 2
+    elif c1 and c2:
+        bits[0] = (bits[0] + 1) % 2
+    elif c1 and c3:
+        bits[1] = (bits[1] + 1) % 2
+    elif c2 and c3:
+        bits[2] = (bits[2] + 1) % 2
     return [bits[0], bits[1], bits[2], bits[3]]
 
 def code_Hamming74 (bits):
@@ -125,44 +127,41 @@ def decodage (LQR_et_type):
     txt = ""
     if type_donnees == 1:
         for i in range (nbrLig(L_QR)):
-            txt += chr(int("".join(map(str, decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:]))), 2))
+            l = decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:])
+            l.reverse()
+            txt += chr(int("".join(map(str, l)), 2))
         return txt
     else :
         for i in range (nbrLig(L_QR)):
-            txt += hex(int("".join(map(str, decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:]))), 2))[2:4]
+            l = decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:])
+            l.reverse()
+            txt += hex(int("".join(map(str, l)), 2))[2:4]
         return txt
 
 def enlever_filtre(QR):
     if (QR[23][8], QR[22][8]) == (0,0):
         return QR
-    elif (QR[23][8], QR[22][8]) == (0,1):
-        filtre = [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,0):
+        filtre = [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+    elif (QR[23][8], QR[22][8]) == (0,1):
         filtre = [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,1):
         filtre = [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
-    for i in range (9,nbrLig(QR)-1):
-        for j in range (11, nbrCol(QR)-1):
+    for i in range (9,nbrLig(QR)):
+        for j in range (11, nbrCol(QR)):
             QR[i][j] = QR[i][j]^filtre[i][j]
     return QR
 
-"""QR = lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png")))[0]
-txt = []
-for i in range (nbrLig(QR)):
-    l = decode_Hamming74 (QR[i][:7]) + decode_Hamming74 (QR[i][7:])
-    txt += [l]
-print(txt)"""
-#print(lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png"))))
-#print(decodage(lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png")))))
+def lire():
+    filename = filedialog.askopenfile(mode='rb', title='Choose a file')
+    label_lu.config(text = decodage(lecture(enlever_filtre(verif_coin(loading(filename))))))
 
-"""
 racine=tk.Tk()
 
-b_save=tk.Button(racine, text="sauvegarder")
-b_charge=tk.Button(racine, text="charger")
+b_lire=tk.Button(racine, text="Lire un QR code", command = lire)
+label_lu = tk.Label(racine)
 
-b_save.pack(side="top", fill="x")
-b_charge.pack(side="top", fill="x")
+b_lire.pack(side="top", fill="x")
+label_lu.pack(side = "bottom", fill = "x")
 
 racine.mainloop()
-"""
