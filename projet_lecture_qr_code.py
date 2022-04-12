@@ -72,19 +72,24 @@ def verif_ligne_colonne(QR):
         pass
 
 def decode_Hamming74 (bits):
-    c1 = int(bits[0] != (bits[2] + bits[4] + bits[6])%2)
-    c2 = int(bits[1] != (bits[2] + bits[5] + bits[6])%2)
-    c3 = int(bits[3] != (bits[4] + bits[5] + bits[6])%2)
-    if c1 + c2 + c3 > 0:
-        pos = c3 * 4 + c2 * 2 + c1 - 1
-        bits[pos] = (bits[pos] + 1) % 2
-    return [bits[2], bits[4], bits[5], bits[6]]
+    c1 = bits[4] != (bits[0] + bits[1] + bits[3])%2
+    c2 = bits[5] != (bits[0] + bits[2] + bits[3])%2
+    c3 = bits[6] != (bits[1] + bits[2] + bits[3])%2
+    if c1 and c2:
+        bits[0] = (bits[0] + 1) % 2
+    elif c2 and c3:
+        bits[1] = (bits[1] + 1) % 2
+    elif c1 and c3:
+        bits[2] = (bits[2] + 1) % 2
+    elif c1 and c2 and c3:
+        bits[3] = (bits[3] + 1) % 2
+    return [bits[0], bits[1], bits[2], bits[3]]
 
 def code_Hamming74 (bits):
     v1 = (bits[0] + bits[1] + bits[3])%2
     v2 = (bits[0] + bits[2] + bits[3])%2
     v3 = (bits[1] + bits[2] + bits[3])%2
-    return [v1, v2, bits[0], v3, bits[1], bits[2], bits[3]]
+    return [bits[0], bits[1], bits[2], bits[3], v1, v2, v3]
 
 def lecture (QR):
     bloc = []
@@ -131,11 +136,11 @@ def enlever_filtre(QR):
     if (QR[23][8], QR[22][8]) == (0,0):
         return QR
     elif (QR[23][8], QR[22][8]) == (0,1):
-        filtre = [[(j+i)%2 for i in range (25)]for j in range (25)]
+        filtre = [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,0):
-        filtre = [[j%2 for i in range (25)]for j in range (25)]
+        filtre = [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,1):
-        filtre = [[i%2 for i in range (25)]for j in range (25)]
+        filtre = [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     for i in range (9,nbrLig(QR)-1):
         for j in range (11, nbrCol(QR)-1):
             QR[i][j] = QR[i][j]^filtre[i][j]
@@ -148,7 +153,7 @@ for i in range (nbrLig(QR)):
     txt += [l]
 print(txt)"""
 #print(lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png"))))
-#print(decodage(lecture(verif_coin(loading("qr_code_ssfiltre_num.png")))))
+#print(decodage(lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png")))))
 
 """
 racine=tk.Tk()
