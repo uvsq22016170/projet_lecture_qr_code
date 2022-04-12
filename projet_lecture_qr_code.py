@@ -4,7 +4,6 @@ import PIL as pil
 from PIL import Image
 from PIL import ImageTk 
 from tkinter import filedialog
-from tkinter import simpledialog
 
 #Fonctions
 def nbrCol(mat):
