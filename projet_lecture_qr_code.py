@@ -127,6 +127,18 @@ def decodage (LQR_et_type):
             txt += hex(int("".join(map(str, decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:]))), 2))[2:4]
         return txt
 
+def enlever_filtre(QR):
+    if (QR[23][8], QR[22][8]) == (0,1):
+        filtre = [[(j+i)%2 for i in range (25)]for j in range (25)]
+    elif (QR[23][8], QR[22][8]) == (1,0):
+        filtre = [[j%2 for i in range (25)]for j in range (25)]
+    elif (QR[23][8], QR[22][8]) == (1,1):
+        filtre = [[i%2 for i in range (25)]for j in range (25)]
+    for i in range (9,nbrLig(QR)-1):
+        for j in range (11, nbrCol(QR)-1):
+            QR[i][j] = QR[i][j]^filtre[i][j]
+    return QR
+
 """QR = lecture(verif_coin(loading("qr_code_ssfiltre_ascii.png")))[0]
 txt = []
 for i in range (nbrLig(QR)):
