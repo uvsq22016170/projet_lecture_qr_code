@@ -4,6 +4,7 @@ import PIL as pil
 from PIL import Image
 from PIL import ImageTk 
 from tkinter import filedialog
+import tkinter.messagebox as mb
 
 #Fonctions
 def nbrCol(mat):
@@ -64,13 +65,14 @@ def verif_ligne_colonne(QR):
     for i in range(6, 19):
         l2[i-6]=QR[6][i]
     if l2 != l1:
-        print("Erreur: Le QR code n'a pas le bon format")
-        pass
+        mb.showerror("Erreur", "Le QR code n'a pas le bon format")
+        return False
     for j in range(6, 19):
         l2[j-6]=QR[j][6]
     if l2 != l1:
-        print("Erreur: Le QR code n'a pas le bon format")
-        pass
+        mb.showerror("Erreur", "Le QR code n'a pas le bon format")
+        return False
+    return True
 
 def decode_Hamming74 (bits):
     c1 = bits[4] != (bits[0] + bits[1] + bits[3])%2
@@ -95,10 +97,9 @@ def code_Hamming74 (bits):
 def lecture (QR):
     bloc = []
     L_QR = []
-    cpt = 0
     type_donnees = QR[24][8]
     for i in range (nbrLig(QR) - 1, 8, -2):
-        if cpt % 2 == 0:
+        if i % 4 == 0:
             m = nbrCol(QR) - 1
             n = nbrCol(QR) - 15
             p = -1
@@ -117,7 +118,6 @@ def lecture (QR):
             return(L_QR, type_donnees)
         L_QR.append(bloc)
         bloc = []
-        cpt += 1
     return L_QR, type_donnees
 
 def decodage (LQR_et_type):
@@ -137,15 +137,18 @@ def decodage (LQR_et_type):
             txt += hex(int("".join(map(str, l)), 2))[2:4]
         return txt
 
-def enlever_filtre(QR):
-    if (QR[23][8], QR[22][8]) == (0,0):
-        return QR
-    elif (QR[23][8], QR[22][8]) == (1,0):
-        filtre = [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+def genere_filtre(QR):
+    if (QR[23][8], QR[22][8]) == (1,0):
+        return [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (0,1):
-        filtre = [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+        return [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,1):
-        filtre = [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+        return [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+
+def enlever_filtre(QR):
+    filtre = genere_filtre(QR)
+    if filtre == None:
+        return QR
     for i in range (9,nbrLig(QR)):
         for j in range (11, nbrCol(QR)):
             QR[i][j] = QR[i][j]^filtre[i][j]
@@ -153,12 +156,14 @@ def enlever_filtre(QR):
 
 def lire():
     filename = filedialog.askopenfile(mode='rb', title='Choose a file')
-    label_lu.config(text = decodage(lecture(enlever_filtre(verif_coin(loading(filename))))))
+    QR = verif_coin(loading(filename))
+    if verif_ligne_colonne(QR) :
+        label_lu.config(text = decodage(lecture(enlever_filtre(QR))))
 
 racine=tk.Tk()
 
-b_lire=tk.Button(racine, text="Lire un QR code", command = lire)
-label_lu = tk.Label(racine)
+b_lire=tk.Button(racine, text="Lire un QR code", command = lire, width = 100)
+label_lu = tk.Label(racine, width = 100)
 
 b_lire.pack(side="top", fill="x")
 label_lu.pack(side = "bottom", fill = "x")
