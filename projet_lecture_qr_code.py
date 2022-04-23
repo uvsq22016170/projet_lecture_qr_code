@@ -32,31 +32,6 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
             mat[i][j]= 0 if toLoad.getpixel((j,i)) == 0 else 1
     return mat
 
-def zoom(mat):
-    mat_zoom = [[0 for i in range (nbrCol(mat) * 2)] for j in range (nbrLig(mat) * 2)]
-    #créer une matrice de largeur et hauteur deux fois plus grande 
-    for i in range(nbrLig(mat)):
-        for j in range(nbrCol(mat)):
-            mat_zoom[2*i][2*j] = mat[i][j]
-            mat_zoom[2*i+1][2*j] = mat[i][j]
-            mat_zoom[2*i][2*j+1] = mat[i][j]
-            mat_zoom[2*i+1][2*j+1] = mat[i][j]
-    return mat_zoom
-
-def charger(filename):
-    global create
-    img = pil.Image.open(filename)
-    photo = ImageTk.PhotoImage(img)
-    if create:    
-        canvas = tk.Canvas(racine, width = img.size[0], height = img.size[1])
-        dessin = canvas.create_image(0,0,anchor = tk.NW, image=photo)
-        canvas.grid(row=4,column=2,rowspan=12)
-        create=False
-    else:
-        canvas = tk.Canvas(racine, width = img.size[0], height = img.size[1])
-        dessin=canvas.create_image(0,0,anchor = tk.NW, image=photo)
-        canvas.grid(row=4,column=2,rowspan=12)
-
 def rotate(mat):
     mat_rota = [[0 for i in range (nbrLig(mat))] for j in range (nbrCol(mat))]
     for i in range(nbrLig(mat_rota)):
@@ -241,8 +216,6 @@ def ecrire ():
     QR = ecriture_donnes(loading("frame.png"), msg)
     QR = ecriture_msg(encodage(msg), QR)
     saving(QR, "qr_code_genere_" + e_nom.get() + ".png")
-    saving(zoom(QR), "qr_code_genere_zoome")
-    charger("qr_code_genere_zoome")
 
 racine=tk.Tk()
 racine.title("Lecture et écriture de QR codes")
