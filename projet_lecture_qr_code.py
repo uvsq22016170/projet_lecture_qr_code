@@ -28,7 +28,7 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
     for i in range(toLoad.size[1]):
         for j in range(toLoad.size[0]):
             mat[i][j]= 0 if toLoad.getpixel((j,i)) == 0 else 1
-    return(mat)
+    return mat
 
 def rotate(mat):
     mat_rota = [[0 for i in range (nbrLig(mat))] for j in range (nbrCol(mat))]
@@ -38,14 +38,13 @@ def rotate(mat):
     return mat_rota
 
 def genere_coin():
-    global coin_QR
     l1 = [0] * 7
     l2 = [0] + [1] * 5 + [0]
     l3 = [0,1] + [0] * 3 + [1,0]
-    coin_QR = [l1, l2, l3, l3, l3, l2, l1]
+    return [l1, l2, l3, l3, l3, l2, l1]
 
 def verif_coin(QR):
-    genere_coin()
+    coin_QR = genere_coin()
     cpt = 1
     coin = [[0]*7 for i in range (7)]
     for (m, n) in [(0, nbrCol(QR) - 7), (0, 0), (nbrLig(QR) - 7, 0)]:
@@ -98,6 +97,11 @@ def lecture (QR):
     bloc = []
     L_QR = []
     type_donnees = QR[24][8]
+    nbr_bloc_bin = ""
+    for n in range (13, 18):
+        nbr_bloc_bin += str(QR[n][0])
+    nbr_bloc = int(nbr_bloc_bin, 2)
+    print("Nombre de blocs utilisés : " + str(nbr_bloc))
     for i in range (nbrLig(QR) - 1, 8, -2):
         if i % 4 == 0:
             m = nbrCol(QR) - 1
@@ -108,16 +112,12 @@ def lecture (QR):
             n = nbrCol(QR)
             p = 1
         for j in range (m, n, p):
+            bloc.extend([QR[i][j], QR[i-1][j]])
             if len(bloc) == 14 :
-                if bloc == [1]*14:
-                    return(L_QR, type_donnees)
                 L_QR.append(bloc)
                 bloc = []
-            bloc.extend([QR[i][j], QR[i-1][j]])
-        if bloc == [1]*14:
-            return(L_QR, type_donnees)
-        L_QR.append(bloc)
-        bloc = []
+                if nbrLig(L_QR) == nbr_bloc:
+                    return L_QR, type_donnees
     return L_QR, type_donnees
 
 def decodage (LQR_et_type):
@@ -127,13 +127,11 @@ def decodage (LQR_et_type):
     if type_donnees == 1:
         for i in range (nbrLig(L_QR)):
             l = decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:])
-            l.reverse()
             txt += chr(int("".join(map(str, l)), 2))
         return txt
     else :
         for i in range (nbrLig(L_QR)):
             l = decode_Hamming74 (L_QR[i][:7]) + decode_Hamming74 (L_QR[i][7:])
-            l.reverse()
             txt += hex(int("".join(map(str, l)), 2))[2:4]
         return txt
 
