@@ -6,8 +6,6 @@ from PIL import ImageTk
 from tkinter import filedialog
 import tkinter.messagebox as mb
 
-create=True
-
 #Fonctions
 def nbrCol(mat):
     return len(mat[0])
@@ -31,6 +29,28 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
         for j in range(toLoad.size[0]):
             mat[i][j]= 0 if toLoad.getpixel((j,i)) == 0 else 1
     return mat
+
+def charger(filename):
+    global photo
+    global img
+    global canvas
+    global dessin
+    img = pil.Image.open(filename)
+    photo = ImageTk.PhotoImage(img)   
+    canvas = tk.Canvas(racine, width = img.size[0] + 2, height = img.size[1] + 2)
+    dessin = canvas.create_image(2,2,anchor = tk.NW, image=photo)
+    canvas.grid(row=6, column=3, rowspan=9)
+
+def zoom(mat):
+    mat_zoom = [[0 for i in range (nbrCol(mat) * 2)] for j in range (nbrLig(mat) * 2)]
+    #créer une matrice de largeur et hauteur deux fois plus grande 
+    for i in range(nbrLig(mat)):
+        for j in range(nbrCol(mat)):
+            mat_zoom[2*i][2*j] = mat[i][j]
+            mat_zoom[2*i+1][2*j] = mat[i][j]
+            mat_zoom[2*i][2*j+1] = mat[i][j]
+            mat_zoom[2*i+1][2*j+1] = mat[i][j]
+    return mat_zoom
 
 def rotate(mat):
     mat_rota = [[0 for i in range (nbrLig(mat))] for j in range (nbrCol(mat))]
@@ -169,7 +189,11 @@ def encodage(msg):
                 c = "0" + c
             L_QR.extend(code_Hamming74(list(map(int, c))[:4]) + code_Hamming74(list(map(int, c))[4:]))
         else:
-            c = format(int(x,16), "b")
+            try :
+                c = format(int(x,16), "b")
+            except :
+                mb.showerror("Erreur", "Le message saisi n'est pas de l'hexadécimal")
+                return False
             for n in range(4 - len(c)):
                 c = "0" + c
             L_QR.extend(code_Hamming74(list(map(int, c))))
@@ -207,24 +231,31 @@ def ecriture_msg(L_QR, QR):
 
 def ecrire ():
     msg = e_msg.get()
-    if len(msg) > 16:
-        mb.showerror("Erreur", "La taille maximum du message est 16 caractères")
+    if len(msg) > 16 or len(msg) == 0:
+        mb.showwarning("Attention", "La taille maximum du message doit être comprise entre 1 et 16 caractères")
         return
     if v_type.get() == "0" and len(msg)%2 == 1:
-        mb.showerror("Erreur", "Un message en hexadécimal doit avoir une taille paire")
+        mb.showwarning("Attention", "Un message en hexadécimal doit avoir une taille paire")
         return
     QR = ecriture_donnes(loading("frame.png"), msg)
+    if encodage(msg) == False:
+        return
     QR = ecriture_msg(encodage(msg), QR)
-    saving(QR, "qr_code_genere_" + e_nom.get() + ".png")
+    saving(QR, "qr_code_genere" + "_"*bool(len(e_nom.get())) + e_nom.get() + ".png")
+    QR_temp = zoom(zoom(QR))
+    saving(QR_temp, "temp.png")
+    charger("temp.png")
 
 racine=tk.Tk()
 racine.title("Lecture et écriture de QR codes")
 l_titre_lecture = tk.Label(racine, text="Lecture de QR codes")
 b_lire=tk.Button(racine, text="Lire un QR code", command = lire)
 l_contenu = tk.Label(racine, text="Contenu du QR code : ")
-l_separation = tk.Label(racine, text="")
+l_separation1 = tk.Label(racine, text="")
 l_titre_ecriture = tk.Label(racine, text="Ecriture de QR codes")
-l_info_ecriture = tk.Label(racine, text="Informations à écrire dans le QR code : ")
+l_separation2 = tk.Label(racine, text="                 ")
+l_info_ecriture1 = tk.Label(racine, text="Informations à écrire dans le QR code : ")
+l_info_ecriture2 = tk.Label(racine, text="QR code créé : ")
 e_msg = tk.Entry(racine)
 l_type = tk.Label(racine, text="Format des données :")
 v_type = tk.StringVar()
@@ -245,10 +276,12 @@ b_ecrire=tk.Button(racine, text="Créer le QR code", command = ecrire)
 l_titre_lecture.grid(columnspan=2)
 b_lire.grid(row=1, sticky="nsw")
 l_contenu.grid(row=2, sticky="nsw")
-l_separation.grid(row=3)
+l_separation1.grid(row=3)
 l_titre_ecriture.grid(row=4, columnspan=2)
-l_info_ecriture.grid(row=5, sticky="nsw")
+l_separation2.grid(row=5, column=2)
+l_info_ecriture1.grid(row=5, sticky="nsw")
 e_msg.grid(row=5, column=1, sticky="nsw")
+l_info_ecriture2.grid(row=7, column=3, sticky="nsw")
 l_type.grid(row=6, sticky="nsw")
 rb_ascii.grid(row=7, sticky="nsw", ipadx = 10)
 rb_hexa.grid(row=8, sticky="nsw", ipadx = 10)
