@@ -244,8 +244,13 @@ def ecrire ():
     saving(QR_temp, "temp.png")
     charger("temp.png")
 
+#Partie principale
+
+#Création de la fenêtre
 racine=tk.Tk()
 racine.title("Lecture et écriture de QR codes")
+
+#Creation des widgets
 l_titre_lecture = tk.Label(racine, text="Lecture de QR codes")
 b_lire=tk.Button(racine, text="Lire un QR code", command = lire)
 l_contenu = tk.Label(racine, text="Contenu du QR code : ")
@@ -271,6 +276,7 @@ l_nom = tk.Label(racine, text="Nom du QR code : ")
 e_nom = tk.Entry(racine)
 b_ecrire=tk.Button(racine, text="Créer le QR code", command = ecrire)
 
+#Placement des widgets
 l_titre_lecture.grid(columnspan=2)
 b_lire.grid(row=1, sticky="nsw")
 l_contenu.grid(row=2, sticky="nsw")
@@ -292,4 +298,5 @@ l_nom.grid(row=14, sticky="nsw")
 e_nom.grid(row=14, column=1, sticky="nsw")
 b_ecrire.grid(row=15, sticky="nsw")
 
+#Boucle principale
 racine.mainloop()
