@@ -157,7 +157,7 @@ def filtre(QR):
     if (QR[23][8], QR[22][8]) == (0,0):
         return QR
     elif (QR[23][8], QR[22][8]) == (1,0):
-        filtre = [[(j+i-1)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+        filtre = [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (0,1):
         filtre = [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     elif (QR[23][8], QR[22][8]) == (1,1):
