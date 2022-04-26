@@ -43,7 +43,6 @@ def charger(filename):
 
 def zoom(mat):
     mat_zoom = [[0 for i in range (nbrCol(mat) * 2)] for j in range (nbrLig(mat) * 2)]
-    #créer une matrice de largeur et hauteur deux fois plus grande 
     for i in range(nbrLig(mat)):
         for j in range(nbrCol(mat)):
             mat_zoom[2*i][2*j] = mat[i][j]
@@ -83,14 +82,11 @@ def verif_coin(QR):
 def verif_ligne_colonne(QR):
     l1 = [i % 2 for i in range (13)] 
     l2 = [0] * 13
+    l3 = [0] * 13
     for i in range(6, 19):
         l2[i-6]=QR[6][i]
-    if l2 != l1:
-        mb.showerror("Erreur", "Le QR code n'a pas le bon format")
-        return False
-    for j in range(6, 19):
-        l2[j-6]=QR[j][6]
-    if l2 != l1:
+        l3[i-6]=QR[i][6]
+    if l2 != l1 or l3 != l1:
         mb.showerror("Erreur", "Le QR code n'a pas le bon format")
         return False
     return True
@@ -157,18 +153,15 @@ def decodage(LQR_et_type):
             txt += hex(int("".join(map(str, l)), 2))[2:4]
         return txt
 
-def genere_filtre(QR):
-    if (QR[23][8], QR[22][8]) == (1,0):
-        return [[(j+i)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
-    elif (QR[23][8], QR[22][8]) == (0,1):
-        return [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
-    elif (QR[23][8], QR[22][8]) == (1,1):
-        return [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
-
-def enlever_filtre(QR):
-    filtre = genere_filtre(QR)
-    if filtre == None:
+def filtre(QR):
+    if (QR[23][8], QR[22][8]) == (0,0):
         return QR
+    elif (QR[23][8], QR[22][8]) == (1,0):
+        filtre = [[(j+i-1)%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+    elif (QR[23][8], QR[22][8]) == (0,1):
+        filtre = [[j%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
+    elif (QR[23][8], QR[22][8]) == (1,1):
+        filtre = [[i%2 for i in range (nbrLig(QR))]for j in range (nbrCol(QR))]
     for i in range (9,nbrLig(QR)):
         for j in range (11, nbrCol(QR)):
             QR[i][j] = QR[i][j]^filtre[i][j]
@@ -178,7 +171,7 @@ def lire ():
     filename = filedialog.askopenfile(mode='rb', title='Choose a file')
     QR = verif_coin(loading(filename))
     if verif_ligne_colonne(QR) :
-        l_contenu.config(text = "Contenu du QR code : " + decodage(lecture(enlever_filtre(QR))))
+        l_contenu.config(text = "Contenu du QR code : " + decodage(lecture(filtre(QR))))
 
 def encodage(msg):
     L_QR = []
@@ -189,11 +182,7 @@ def encodage(msg):
                 c = "0" + c
             L_QR.extend(code_Hamming74(list(map(int, c))[:4]) + code_Hamming74(list(map(int, c))[4:]))
         else:
-            try :
-                c = format(int(x,16), "b")
-            except :
-                mb.showerror("Erreur", "Le message saisi n'est pas de l'hexadécimal")
-                return False
+            c = format(int(x,16), "b")
             for n in range(4 - len(c)):
                 c = "0" + c
             L_QR.extend(code_Hamming74(list(map(int, c))))
@@ -201,13 +190,16 @@ def encodage(msg):
 
 def ecriture_donnes (QR, msg):
     QR[24][8] = int(v_type.get())
-    nbr_bloc_bin = list(map(int, format(len(msg), "b")))
+    if v_type.get() == "1":
+        nbr_bloc_bin = list(map(int, format(len(msg), "b")))
+    else :
+        nbr_bloc_bin = list(map(int, format(len(msg)//2, "b")))
     for n in range(5 - len(nbr_bloc_bin)):
                 nbr_bloc_bin = [0] + nbr_bloc_bin
     for n in range (13, 18):
         QR[n][0] = nbr_bloc_bin[n - 13]
-    QR[22][8] = int(v_filtre.get()[1])
-    QR[23][8] = int(v_filtre.get()[4])
+    QR[22][8] = int(v_filtre.get()[0])
+    QR[23][8] = int(v_filtre.get()[1])
     return QR
 
 def ecriture_msg(L_QR, QR):
@@ -231,16 +223,22 @@ def ecriture_msg(L_QR, QR):
 
 def ecrire ():
     msg = e_msg.get()
-    if len(msg) > 16 or len(msg) == 0:
-        mb.showwarning("Attention", "La taille maximum du message doit être comprise entre 1 et 16 caractères")
+    if v_type.get() == "1" and (len(msg) > 16 or len(msg) == 0):
+        mb.showwarning("Attention", "La taille maximum d'un message en ascii doit être comprise entre 1 et 16 caractères")
+        return
+    elif v_type.get() == "0" and (len(msg) > 32 or len(msg) == 0):
+        mb.showwarning("Attention", "La taille maximum d'un message en hexadécimal doit être comprise entre 1 et 32 caractères")
         return
     if v_type.get() == "0" and len(msg)%2 == 1:
         mb.showwarning("Attention", "Un message en hexadécimal doit avoir une taille paire")
         return
     QR = ecriture_donnes(loading("frame.png"), msg)
-    if encodage(msg) == False:
+    try :
+        L_QR = encodage(msg)
+    except :
+        mb.showerror("Erreur", "Le message saisi n'est pas de l'hexadécimal")
         return
-    QR = ecriture_msg(encodage(msg), QR)
+    QR = filtre(ecriture_msg(L_QR, QR))
     saving(QR, "qr_code_genere" + "_"*bool(len(e_nom.get())) + e_nom.get() + ".png")
     QR_temp = zoom(zoom(QR))
     saving(QR_temp, "temp.png")
@@ -264,11 +262,11 @@ rb_ascii = tk.Radiobutton(racine, variable=v_type, text="Ascii", value=1)
 rb_hexa = tk.Radiobutton(racine, variable=v_type, text="Hexadécimal", value=0)
 l_filtre = tk.Label(racine, text="Filtre :")
 v_filtre = tk.StringVar()
-v_filtre.set((0, 0))
-rb_aucun = tk.Radiobutton(racine, variable=v_filtre, text="Pas de filtre", value=(0, 0))
-rb_damier = tk.Radiobutton(racine, variable=v_filtre, text="Damier", value=(0, 1))
-rb_horizontal = tk.Radiobutton(racine, variable=v_filtre, text="Lignes horizontales alternées", value=(1, 0))
-rb_vertical = tk.Radiobutton(racine, variable=v_filtre, text="Lignes verticales alternées", value=(1, 1))
+v_filtre.set("00")
+rb_aucun = tk.Radiobutton(racine, variable=v_filtre, text="Pas de filtre", value="00")
+rb_damier = tk.Radiobutton(racine, variable=v_filtre, text="Damier", value="01")
+rb_horizontal = tk.Radiobutton(racine, variable=v_filtre, text="Lignes horizontales alternées", value="10")
+rb_vertical = tk.Radiobutton(racine, variable=v_filtre, text="Lignes verticales alternées", value="11")
 l_nom = tk.Label(racine, text="Nom du QR code : ")
 e_nom = tk.Entry(racine)
 b_ecrire=tk.Button(racine, text="Créer le QR code", command = ecrire)
