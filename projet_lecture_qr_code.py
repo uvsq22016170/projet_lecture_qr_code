@@ -1,3 +1,10 @@
+# Dans tous les commentaires une matrice désigne un liste de listes où une
+# sous liste équivaut à une ligne.
+
+# QR désigne la matrice de pixels (0:pixel noir, 1:pixel blanc)
+# représentant un QR code.
+
+
 # Importation des modules
 import tkinter as tk
 import PIL as pil
@@ -9,18 +16,23 @@ import tkinter.messagebox as mb
 # Fonctions
 
 def nbrCol(mat):
+    """
+    Retourne le nombre de colonnes de la matrice mat.
+    """
     return len(mat[0])
 
 
 def nbrLig(mat):
+    """
+    Retourne le nombre de lignes de la matrice mat.
+    """
     return len(mat)
 
 
 def saving(mat, filename):
     """
-    Sauvegarde l'image contenue dans matpix dans le fichier
-    filename utiliser une extension png pour que la fonction
-    fonctionne sans perte d'information.
+    Sauvegarde l'image contenue dans mat (matrice de pixels) dans le fichier
+    filename.
     """
     toSave = pil.Image.new(mode="1", size=(nbrCol(mat), nbrLig(mat)))
     for i in range(nbrLig(mat)):
@@ -31,8 +43,8 @@ def saving(mat, filename):
 
 def loading(filename):
     """
-    charge le fichier image filename et renvoie une matrice de 0 et
-    de 1 qui représente l'image en noir et blanc
+    Retourne la matrice (mat) de pixels (0:pixel noir, 1:pixel blanc)
+    correspondant à l'image contenue dans le fichier filename.
     """
     toLoad = pil.Image.open(filename)
     mat = [[0]*toLoad.size[0] for k in range(toLoad.size[1])]
@@ -43,6 +55,10 @@ def loading(filename):
 
 
 def charger(filename):
+    """
+    Positionne l'image contenue dans le fichier filename dans la fenêtre
+    racine.
+    """
     global photo
     global img
     global canvas
@@ -55,6 +71,10 @@ def charger(filename):
 
 
 def zoom(mat):
+    """
+    Retourne une matrice mat_zoom de largeur et hauteur deux fois plus grande
+    que la matrice mat.
+    """
     mat_zoom = [[0 for i in range(nbrCol(mat) * 2)]
                 for j in range(nbrLig(mat) * 2)]
     for i in range(nbrLig(mat)):
@@ -67,6 +87,10 @@ def zoom(mat):
 
 
 def rotate(mat):
+    """
+    Retourne une matrice mat_rota qui correspond à la matrice mat tournée de
+    90° vers la droite.
+    """
     mat_rota = [[0 for i in range(nbrLig(mat))] for j in range(nbrCol(mat))]
     for i in range(nbrLig(mat_rota)):
         for j in range(nbrCol(mat_rota)):
@@ -75,6 +99,10 @@ def rotate(mat):
 
 
 def genere_coin():
+    """
+    Retourne une matrice représentant le coin (sauf celui en bas à droite)
+    d'un QR code.
+    """
     l1 = [0] * 7
     l2 = [0] + [1] * 5 + [0]
     l3 = [0, 1] + [0] * 3 + [1, 0]
@@ -82,6 +110,10 @@ def genere_coin():
 
 
 def verif_coin(QR):
+    """
+    Retourne le QR code tourné autant de fois que nécessaire pour qu'il soit
+    orienté correctement (coin positonnés correctement).
+    """
     coin_QR = genere_coin()
     cpt = 1
     coin = [[0]*7 for i in range(7)]
@@ -98,6 +130,10 @@ def verif_coin(QR):
 
 
 def verif_ligne_colonne(QR):
+    """
+    Vérifie que les lignes entre les coins (sauf celui en bas à droite)
+    apparaissent correctement.
+    """
     l1 = [i % 2 for i in range(13)]
     l2 = [0] * 13
     l3 = [0] * 13
@@ -111,6 +147,10 @@ def verif_ligne_colonne(QR):
 
 
 def decode_Hamming74(bits):
+    """
+    Retourne les 4 bits de message contenus dans la liste bits (7 bits)
+    corrigés avec le code de Hamming (7, 4).
+    """
     c1 = bits[4] != (bits[0] + bits[1] + bits[3]) % 2
     c2 = bits[5] != (bits[0] + bits[2] + bits[3]) % 2
     c3 = bits[6] != (bits[1] + bits[2] + bits[3]) % 2
@@ -126,6 +166,10 @@ def decode_Hamming74(bits):
 
 
 def code_Hamming74(bits):
+    """
+    Retourne 7 bits codés en Hamming (7, 4) à partir des 4 bits de la liste
+    bits.
+    """
     v1 = (bits[0] + bits[1] + bits[3]) % 2
     v2 = (bits[0] + bits[2] + bits[3]) % 2
     v3 = (bits[1] + bits[2] + bits[3]) % 2
@@ -133,6 +177,10 @@ def code_Hamming74(bits):
 
 
 def lecture(QR):
+    """
+    Affiche le nombre de blocs utilisés.
+    Retourne la liste des blocs et le type des données de QR.
+    """
     bloc = []
     L_QR = []
     type_donnees = QR[24][8]
@@ -143,12 +191,12 @@ def lecture(QR):
     print("Nombre de blocs utilisés : " + str(nbr_bloc))
     for i in range(nbrLig(QR) - 1, 8, -2):
         if i % 4 == 0:
-            m = nbrCol(QR) - 1
-            n = nbrCol(QR) - 15
+            m = 24
+            n = 10
             p = -1
         else:
-            m = nbrCol(QR) - 14
-            n = nbrCol(QR)
+            m = 11
+            n = 25
             p = 1
         for j in range(m, n, p):
             bloc.extend([QR[i][j], QR[i-1][j]])
@@ -161,6 +209,10 @@ def lecture(QR):
 
 
 def decodage(LQR_et_type):
+    """
+    Retourne la chaine de caractère qui correspond aux informations écrites
+    dans le QR code.
+    """
     L_QR = LQR_et_type[0]
     type_donnees = LQR_et_type[1]
     txt = ""
@@ -177,6 +229,9 @@ def decodage(LQR_et_type):
 
 
 def filtre(QR):
+    """
+    Créé un filtre par rapport au donnés du QR code et l'applique au QR code.
+    """
     if (QR[23][8], QR[22][8]) == (0, 0):
         return QR
     elif (QR[23][8], QR[22][8]) == (1, 0):
@@ -193,14 +248,26 @@ def filtre(QR):
 
 
 def lire():
+    """
+    Affiche à droite du label l_contenu les informations du QR code choisi par
+    l'utilisateur.
+    """
     filename = filedialog.askopenfile(mode='rb', title='Choose a file')
-    QR = verif_coin(loading(filename))
+    try:
+        QR = loading(filename)
+    except pil.UnidentifiedImageError:
+        mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
+        return
+    QR = verif_coin(QR)
     if verif_ligne_colonne(QR):
         l_contenu.config(text="Contenu du QR code : " +
                          decodage(lecture(filtre(QR))))
 
 
 def encodage(msg):
+    """
+    Retourne la liste des blocs correspondant à msg.
+    """
     L_QR = []
     for x in msg:
         if v_type.get() == "1":
@@ -218,6 +285,10 @@ def encodage(msg):
 
 
 def ecriture_donnes(QR, msg):
+    """
+    Ecrit le type de données, le nombre de bloc utilisés et le filtre pour msg
+    dans QR.
+    """
     QR[24][8] = int(v_type.get())
     if v_type.get() == "1":
         nbr_bloc_bin = list(map(int, format(len(msg), "b")))
@@ -233,6 +304,9 @@ def ecriture_donnes(QR, msg):
 
 
 def ecriture_msg(L_QR, QR):
+    """
+    Ecrit dans le QR code L_QR.
+    """
     cpt = 0
     for i in range(24, 8, -2):
         if i % 4 == 0:
@@ -253,6 +327,10 @@ def ecriture_msg(L_QR, QR):
 
 
 def ecrire():
+    """
+    Sauvegarde le QR code créé à partir du message entré par l'utilisateur en
+    contrôlant le message et l'affiche dnas racine.
+    """
     msg = e_msg.get()
     if v_type.get() == "1" and (len(msg) > 16 or len(msg) == 0):
         mb.showwarning("Attention", "La taille maximum d'un message en ascii"
@@ -294,7 +372,7 @@ l_contenu = tk.Label(racine, text="Contenu du QR code : ")
 l_separation1 = tk.Label(racine, text="")
 l_titre_ecriture = tk.Label(racine, text="Ecriture de QR codes")
 l_separation2 = tk.Label(racine, text="                 ")
-l_info_ecriture1 = tk.Label(racine, text="Informations à écrire dans le"
+l_info_ecriture1 = tk.Label(racine, text="Informations à écrire dans le "
                             "QR code : ")
 l_info_ecriture2 = tk.Label(racine, text="QR code créé : ")
 e_msg = tk.Entry(racine)
