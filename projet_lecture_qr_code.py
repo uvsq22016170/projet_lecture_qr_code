@@ -223,8 +223,10 @@ def decodage(LQR_et_type):
         return txt
     else:
         for i in range(nbrLig(L_QR)):
-            L = decode_Hamming74(L_QR[i][:7]) + decode_Hamming74(L_QR[i][7:])
-            txt += hex(int("".join(map(str, L)), 2))[2:4]
+            L1 = decode_Hamming74(L_QR[i][:7])
+            L2 = decode_Hamming74(L_QR[i][7:])
+            txt += hex(int("".join(map(str, L1)), 2))[2:4]
+            txt += hex(int("".join(map(str, L2)), 2))[2:4]
         return txt
 
 
@@ -258,6 +260,10 @@ def lire():
     except pil.UnidentifiedImageError:
         mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
         return
+    except AttributeError :
+        return
+    if nbrCol(QR) != 25 and nbrLig(QR) != 25:
+        mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
     QR = verif_coin(QR)
     if verif_ligne_colonne(QR):
         l_contenu.config(text="Contenu du QR code : " +
