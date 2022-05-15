@@ -218,15 +218,15 @@ def decodage(LQR_et_type):
     txt = ""
     if type_donnees == 1:
         for i in range(nbrLig(L_QR)):
-            L = decode_Hamming74(L_QR[i][:7]) + decode_Hamming74(L_QR[i][7:])
-            txt += chr(int("".join(map(str, L)), 2))
+            txt += chr(int("".join(map(str, decode_Hamming74(L_QR[i][:7]) +
+                                       decode_Hamming74(L_QR[i][7:]))), 2))
         return txt
     else:
         for i in range(nbrLig(L_QR)):
-            L1 = decode_Hamming74(L_QR[i][:7])
-            L2 = decode_Hamming74(L_QR[i][7:])
-            txt += hex(int("".join(map(str, L1)), 2))[2:4]
-            txt += hex(int("".join(map(str, L2)), 2))[2:4]
+            txt += hex(int("".join(map(str, decode_Hamming74(L_QR[i][:7]))),
+                           2))[2:4]
+            txt += hex(int("".join(map(str, decode_Hamming74(L_QR[i][7:]))),
+                           2))[2:4]
         return txt
 
 
@@ -260,7 +260,7 @@ def lire():
     except pil.UnidentifiedImageError:
         mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
         return
-    except AttributeError :
+    except AttributeError:
         return
     if nbrCol(QR) != 25 and nbrLig(QR) != 25:
         mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
