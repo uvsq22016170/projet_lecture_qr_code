@@ -264,6 +264,7 @@ def lire():
         return
     if nbrCol(QR) != 25 and nbrLig(QR) != 25:
         mb.showerror("Erreur", "Le fichier séléctionné n'est pas un QR code")
+        return
     QR = verif_coin(QR)
     if verif_ligne_colonne(QR):
         l_contenu.config(text="Contenu du QR code : " +
